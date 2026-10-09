@@ -1,2 +1,3 @@
 Segunda prueba del self-hosted runner
 Tercera prueba tokens iguales
+Cuarta prueba habilito ejecución de scrips

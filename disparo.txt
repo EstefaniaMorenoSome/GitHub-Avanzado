@@ -1,3 +1,4 @@
 Segunda prueba del self-hosted runner
 Tercera prueba tokens iguales
 Cuarta prueba habilito ejecución de scrips
+Quinta prueba: token local modificado

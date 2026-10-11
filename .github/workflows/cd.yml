@@ -1,0 +1,58 @@
+name: CD - Main
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize, reopened]
+
+  push:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  bump-version:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Incrementar versión del README
+        shell: bash
+        run: |
+          CURRENT=$(grep -oE 'AppVersion-[0-9]+' README.md | head -1)
+          NUMBER=$(echo "$CURRENT" | grep -oE '[0-9]+')
+          NEXT=$((NUMBER + 1))
+
+          sed -i "s/AppVersion-$NUMBER/AppVersion-$NEXT/" README.md
+
+          echo "Versión anterior: AppVersion-$NUMBER"
+          echo "Nueva versión: AppVersion-$NEXT"
+          echo "Fecha: $(date '+%d/%m/%Y %H:%M:%S')"
+
+          cat README.md
+
+  validate-prod:
+    needs: bump-version
+    runs-on: self-hosted
+
+    env:
+      PROD_TOKEN: ${{ secrets.PROD_TOKEN }}
+
+    steps:
+      - name: Validar PROD_TOKEN
+        shell: powershell
+        run: |
+          if ($env:PROD_TOKEN -eq $env:LOCAL_PROD_TOKEN) {
+            Write-Host "PROD_TOKEN coincide con LOCAL_PROD_TOKEN."
+            exit 0
+          } else {
+            Write-Host "PROD_TOKEN NO coincide con LOCAL_PROD_TOKEN."
+            exit 1
+          }
